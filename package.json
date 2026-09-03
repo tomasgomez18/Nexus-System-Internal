@@ -1,0 +1,16 @@
+{
+  "name": "nexusinterno",
+  "private": true,
+  "version": "1.0.0",
+  "description": "NexusInterno - frontend (React + Tailwind) y backend (Express + MongoDB)",
+  "scripts": {
+    "dev": "concurrently -n frontend,backend -c cyan,yellow \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "install:all": "npm install --prefix frontend && npm install --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
