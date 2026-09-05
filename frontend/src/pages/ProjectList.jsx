@@ -2,10 +2,32 @@ import { useEffect, useState } from 'react'
 import ProjectCard from '../components/ProjectCard'
 import { getProjects } from '../services/api'
 
+const statusOptions = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'pendiente', label: 'Pendiente' },
+  { value: 'en-progreso', label: 'En progreso' },
+  { value: 'finalizado', label: 'Finalizado' },
+]
+
+const normalize = (str) =>
+  (str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+const filterClass = (active) =>
+  `px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${
+    active
+      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+      : 'bg-gray-900 text-gray-400 border-gray-800 hover:text-gray-200'
+  }`
+
 export default function ProjectList() {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('todos')
 
   useEffect(() => {
     getProjects()
@@ -13,6 +35,16 @@ export default function ProjectList() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
+
+  const query = normalize(search)
+  const filtered = projects.filter((project) => {
+    const matchesStatus = status === 'todos' || project.status === status
+    const matchesSearch =
+      !query ||
+      normalize(project.client).includes(query) ||
+      normalize(project.projectType).includes(query)
+    return matchesStatus && matchesSearch
+  })
 
   return (
     <div className="p-4">
@@ -35,11 +67,39 @@ export default function ProjectList() {
           <p className="text-gray-600 text-xs mt-1">Tocá + Nuevo para crear el primero</p>
         </div>
       ) : (
-        <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-4">
-          {projects.map((project) => (
-            <ProjectCard key={project._id} project={project} />
-          ))}
-        </div>
+        <>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por cliente o tipo..."
+            className="w-full mb-3 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500/50"
+          />
+
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+            {statusOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setStatus(option.value)}
+                className={filterClass(status === option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-400 text-sm">No se encontraron proyectos</p>
+            </div>
+          ) : (
+            <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-4">
+              {filtered.map((project) => (
+                <ProjectCard key={project._id} project={project} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   )
