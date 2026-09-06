@@ -37,6 +37,11 @@ const projectSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+projectSchema.pre('save', function () {
+  const remaining = Math.max((this.finalPrice || 0) - (this.initialPayment || 0), 0)
+  this.finalPayment = this.status === 'finalizado' ? remaining : 0
+})
+
 const Project = mongoose.model('Project', projectSchema)
 
 export default Project

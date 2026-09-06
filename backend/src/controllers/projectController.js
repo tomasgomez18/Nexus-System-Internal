@@ -37,7 +37,9 @@ const syncFinalMovement = async (project) => {
     category: 'pago-final',
   })
 
-  if (!project.finalPayment) {
+  const remaining = (project.finalPrice || 0) - (project.initialPayment || 0)
+
+  if (remaining <= 0) {
     if (existing) await existing.deleteOne()
     return
   }
@@ -45,7 +47,7 @@ const syncFinalMovement = async (project) => {
   const data = {
     type: 'ingreso',
     concept: `Pago final - ${project.client}`,
-    amount: project.finalPayment,
+    amount: remaining,
     date: project.endDate || new Date(),
     category: 'pago-final',
     projectId: project._id,
@@ -81,6 +83,7 @@ export const createProject = asyncHandler(async (req, res) => {
   }
   const project = await Project.create(body)
   if (project.initialPayment > 0) await syncInitialMovement(project)
+  if (project.status === 'finalizado') await syncFinalMovement(project)
   res.status(201).json(project)
 })
 
