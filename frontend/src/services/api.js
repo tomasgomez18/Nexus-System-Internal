@@ -40,9 +40,8 @@ export const formatMoney = (value) =>
     maximumFractionDigits: 0,
   }).format(value || 0)
 
-export const formatDate = (date) =>
-  new Date(date).toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
+export const formatDate = (date) => {
+  const iso = typeof date === 'string' ? date : new Date(date).toISOString()
+  const [y, m, d] = iso.slice(0, 10).split('-')
+  return `${d}/${m}/${y}`
+}
