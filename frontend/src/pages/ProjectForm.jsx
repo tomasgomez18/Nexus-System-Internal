@@ -12,7 +12,7 @@ const STATUSES = [
 ]
 
 const inputClass =
-  'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500'
+  'w-full h-11 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500'
 
 const labelClass = 'block text-xs text-gray-500 mb-1'
 
@@ -146,7 +146,7 @@ export default function ProjectForm() {
 
         <div className="md:col-span-2 mt-3 md:mt-0">
           <div className="grid grid-cols-2 gap-3">
-            <div>
+            <div className="min-w-0">
               <label className={labelClass}>
                 <span className="md:hidden">Inicio *</span>
                 <span className="hidden md:inline">Fecha de inicio *</span>
@@ -159,7 +159,7 @@ export default function ProjectForm() {
                 onChange={(e) => set('startDate', e.target.value)}
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className={labelClass}>
                 <span className="md:hidden">Fin</span>
                 <span className="hidden md:inline">Fecha de finalización</span>
@@ -174,7 +174,7 @@ export default function ProjectForm() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-3">
-            <div>
+            <div className="min-w-0">
 <label className={labelClass}>Pago inicial (ARS)</label>
             <input
               className={inputClass}
@@ -189,7 +189,7 @@ export default function ProjectForm() {
               de inicio
             </p>
             </div>
-            <div>
+            <div className="min-w-0">
 <label className={labelClass}>Pago final (ARS)</label>
             <input
               className={`${inputClass} disabled:opacity-60 disabled:cursor-not-allowed`}
