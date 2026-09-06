@@ -38,7 +38,7 @@ export default function MobileLayout() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 bg-gray-900 border-r border-gray-800 flex-col p-4">
-        <h1 className="text-xl font-bold text-white px-4 py-3">NexusInterno</h1>
+        <h1 className="text-xl font-bold text-white px-4 py-3">NexusCode Panel</h1>
         <nav className="mt-2 space-y-1">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end={to === '/'} className={desktopNavClass}>
