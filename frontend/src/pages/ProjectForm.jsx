@@ -12,7 +12,7 @@ const STATUSES = [
 ]
 
 const inputClass =
-  'w-full h-11 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500'
+  'w-full min-w-0 h-9 bg-gray-800 border border-gray-700 rounded-lg px-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500'
 
 const labelClass = 'block text-xs text-gray-500 mb-1'
 
