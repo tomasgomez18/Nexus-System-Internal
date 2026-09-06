@@ -145,7 +145,7 @@ export default function ProjectForm() {
         </div>
 
         <div className="md:col-span-2 mt-3 md:mt-0">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className={labelClass}>Fecha de inicio *</label>
               <input
@@ -167,7 +167,7 @@ export default function ProjectForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mt-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 mt-3">
             <div>
 <label className={labelClass}>Pago inicial (ARS)</label>
             <input
