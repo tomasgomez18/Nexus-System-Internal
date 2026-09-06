@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteMovement, formatDate, formatMoney, getMonth } from '../services/api'
+import { confirmDialog, useToast } from '../components/Notifications'
 
 const MONTHS = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -19,6 +20,7 @@ const categoryLabels = {
 
 export default function Accounting() {
   const today = new Date()
+  const { toast } = useToast()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth() + 1)
   const [data, setData] = useState(null)
@@ -51,9 +53,20 @@ export default function Accounting() {
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('¿Eliminar este movimiento?')) return
-    await deleteMovement(id)
-    setData(await getMonth(year, month))
+    const ok = await confirmDialog({
+      title: 'Eliminar movimiento',
+      message: '¿Eliminar este movimiento?',
+      confirmLabel: 'Eliminar',
+      danger: true,
+    })
+    if (!ok) return
+    try {
+      await deleteMovement(id)
+      toast.success('Movimiento eliminado')
+      setData(await getMonth(year, month))
+    } catch (err) {
+      toast.error(err.message)
+    }
   }
 
   return (
@@ -110,6 +123,29 @@ export default function Accounting() {
                 }`}
               >
                 {formatMoney(data.balance)}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mb-4 md:max-w-xl">
+            <div className="bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 text-center">
+              <p className="text-xs text-sky-400">Tomás (50%)</p>
+              <p
+                className={`text-sm font-bold mt-1 ${
+                  data.balance >= 0 ? 'text-white' : 'text-red-400'
+                }`}
+              >
+                {formatMoney(data.balance / 2)}
+              </p>
+            </div>
+            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-3 text-center">
+              <p className="text-xs text-purple-400">Pablo (50%)</p>
+              <p
+                className={`text-sm font-bold mt-1 ${
+                  data.balance >= 0 ? 'text-white' : 'text-red-400'
+                }`}
+              >
+                {formatMoney(data.balance / 2)}
               </p>
             </div>
           </div>
