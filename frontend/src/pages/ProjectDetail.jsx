@@ -7,6 +7,7 @@ import {
   getProject,
   updateProject,
 } from '../services/api'
+import { confirmDialog, useToast } from '../components/Notifications'
 
 const statusLabels = {
   pendiente: 'Pendiente',
@@ -24,6 +25,7 @@ const platformColors = {
 export default function ProjectDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -37,23 +39,58 @@ export default function ProjectDetail() {
   if (!project) return <p className="p-4 text-gray-400 text-sm">Proyecto no encontrado</p>
 
   const saldo = project.finalPrice - project.initialPayment - project.finalPayment
+  const remaining = Math.max(
+    (project.finalPrice || 0) - (project.initialPayment || 0),
+    0
+  )
 
   const handleDelete = async () => {
-    if (!confirm(`¿Eliminar el proyecto de ${project.client}?`)) return
-    await deleteProject(id)
-    navigate('/')
+    const ok = await confirmDialog({
+      title: 'Eliminar proyecto',
+      message: `¿Eliminar el proyecto de ${project.client}?`,
+      confirmLabel: 'Eliminar',
+      danger: true,
+    })
+    if (!ok) return
+    try {
+      await deleteProject(id)
+      toast.success('Proyecto eliminado')
+      navigate('/')
+    } catch (err) {
+      toast.error(err.message)
+    }
+  }
+
+  const handleStart = async () => {
+    try {
+      const updated = await updateProject(id, { status: 'en-progreso' })
+      setProject(updated)
+      toast.success('Proyecto en progreso')
+    } catch (err) {
+      toast.error(err.message)
+    }
   }
 
   const handleFinalize = async () => {
     const incomeMsg =
-      project.finalPayment > 0
+      remaining > 0
         ? `Se registrará automáticamente ${formatMoney(
-            project.finalPayment
-          )} (pago final) como ingreso en Contable.`
-        : 'El pago final está en $0, no se registrará ingreso adicional.'
-    if (!confirm(`¿Marcar como finalizado?\n${incomeMsg}`)) return
-    const updated = await updateProject(id, { status: 'finalizado' })
-    setProject(updated)
+            remaining
+          )} (saldo restante) como ingreso en Contable.`
+        : 'No queda saldo pendiente, no se registrará ingreso adicional.'
+    const ok = await confirmDialog({
+      title: 'Marcar como finalizado',
+      message: incomeMsg,
+      confirmLabel: 'Finalizar',
+    })
+    if (!ok) return
+    try {
+      const updated = await updateProject(id, { status: 'finalizado' })
+      setProject(updated)
+      toast.success('Proyecto finalizado')
+    } catch (err) {
+      toast.error(err.message)
+    }
   }
 
   const rows = [
@@ -64,8 +101,8 @@ export default function ProjectDetail() {
     ['Fecha de finalización', project.endDate ? formatDate(project.endDate) : '—'],
     ['Método de pago', project.paymentMethod],
     ['Pago inicial', formatMoney(project.initialPayment)],
-    ['Pago final', formatMoney(project.finalPayment)],
-    ['Saldo', `${formatMoney(saldo)} (${saldo > 0 ? 'pendiente' : 'al día'})`],
+    ['Pago final', project.status === 'finalizado' ? formatMoney(project.finalPayment) : 'Pendiente de cobro'],
+    ['Saldo', `${formatMoney(saldo)} (${saldo > 0 ? 'en deuda' : 'al día'})`],
     ['Estado', statusLabels[project.status]],
   ]
 
@@ -142,7 +179,16 @@ export default function ProjectDetail() {
         </div>
       </div>
 
-      {project.status !== 'finalizado' && (
+      {project.status === 'pendiente' && (
+        <button
+          onClick={handleStart}
+          className="w-full mb-3 text-sm font-semibold text-white bg-sky-600 rounded-xl px-4 py-3.5 active:scale-[0.99] md:flex-1"
+        >
+          ▶ Marcar en progreso
+        </button>
+      )}
+
+      {project.status === 'en-progreso' && (
         <button
           onClick={handleFinalize}
           className="w-full mb-3 text-sm font-semibold text-white bg-emerald-600 rounded-xl px-4 py-3.5 active:scale-[0.99] md:flex-1"

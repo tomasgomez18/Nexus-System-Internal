@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { formatDate, formatMoney } from '../services/api'
+import { formatDate, formatMoney, updateProject } from '../services/api'
+import { confirmDialog, useToast } from './Notifications'
 
 const statusStyles = {
   pendiente: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
@@ -13,8 +14,40 @@ const statusLabels = {
   finalizado: 'Finalizado',
 }
 
-export default function ProjectCard({ project }) {
+export default function ProjectCard({ project, onStatusChange }) {
+  const { toast } = useToast()
   const saldo = project.finalPrice - project.initialPayment - project.finalPayment
+  const remaining = Math.max(
+    (project.finalPrice || 0) - (project.initialPayment || 0),
+    0
+  )
+
+  const handleAdvance = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (project.status === 'en-progreso') {
+      const incomeMsg =
+        remaining > 0
+          ? `Se registrará ${formatMoney(
+              remaining
+            )} (saldo restante) como ingreso en Contable.`
+          : 'No queda saldo pendiente, no se registrará ingreso adicional.'
+      const ok = await confirmDialog({
+        title: 'Marcar como finalizado',
+        message: incomeMsg,
+        confirmLabel: 'Finalizar',
+      })
+      if (!ok) return
+    }
+    try {
+      const next = project.status === 'pendiente' ? 'en-progreso' : 'finalizado'
+      const updated = await updateProject(project._id, { status: next })
+      onStatusChange(updated)
+      toast.success(next === 'finalizado' ? 'Proyecto finalizado' : 'Proyecto en progreso')
+    } catch (err) {
+      toast.error(err.message)
+    }
+  }
 
   return (
     <Link
@@ -50,10 +83,23 @@ export default function ProjectCard({ project }) {
               saldo > 0 ? 'text-amber-400' : 'text-emerald-500'
             }`}
           >
-            Saldo: {formatMoney(saldo)}
+            {saldo > 0 ? `Deuda: ${formatMoney(saldo)}` : 'Al día'}
           </p>
         </div>
       </div>
+
+      {project.status !== 'finalizado' && (
+        <button
+          onClick={handleAdvance}
+          className={`mt-3 w-full text-sm font-semibold rounded-lg px-3 py-2 active:scale-[0.98] ${
+            project.status === 'pendiente'
+              ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30'
+              : 'bg-emerald-600 text-white'
+          }`}
+        >
+          {project.status === 'pendiente' ? '▶ Iniciar' : '✓ Finalizar'}
+        </button>
+      )}
     </Link>
   )
 }
