@@ -20,6 +20,8 @@ export default function Accounts() {
   const [form, setForm] = useState(emptyForm)
   const [editingId, setEditingId] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [selected, setSelected] = useState(null)
+  const [revealPwd, setRevealPwd] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -85,10 +87,21 @@ export default function Accounts() {
       await deleteAccount(id)
       toast.success('Cuenta eliminada')
       if (editingId === id) resetForm()
+      if (selected?._id === id) closeModal()
       setAccounts((prev) => prev.filter((a) => a._id !== id))
     } catch (err) {
       toast.error(err.message)
     }
+  }
+
+  const openModal = (account) => {
+    setSelected(account)
+    setRevealPwd(false)
+  }
+
+  const closeModal = () => {
+    setSelected(null)
+    setRevealPwd(false)
   }
 
   return (
@@ -125,8 +138,8 @@ export default function Accounts() {
         <input
           className={inputClass}
           required
-          type="email"
-          placeholder="tucorreo@mail.com"
+          type="text"
+          placeholder="tucorreo@mail.com o usuario"
           value={form.email}
           onChange={(e) => set('email', e.target.value)}
         />
@@ -185,7 +198,8 @@ export default function Accounts() {
             return (
               <div
                 key={account._id}
-                className={`bg-gray-900 border rounded-xl p-3 mb-2 md:mb-0 ${
+                onClick={() => openModal(account)}
+                className={`cursor-pointer bg-gray-900 border rounded-xl p-3 mb-2 md:mb-0 transition-colors hover:border-gray-700 ${
                   isEditing ? 'border-emerald-500/50' : 'border-gray-800'
                 }`}
               >
@@ -198,23 +212,87 @@ export default function Accounts() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
-                      onClick={() => handleEdit(account)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEdit(account)
+                      }}
                       className="text-xs font-medium text-sky-400 active:scale-95"
                     >
                       Editar
                     </button>
                     <button
-                      onClick={() => handleDelete(account._id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDelete(account._id)
+                      }}
                       className="text-xs font-medium text-red-400 active:scale-95"
                     >
                       Eliminar
                     </button>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 truncate">••••••••</p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs text-gray-400 truncate">••••••••</p>
+                  <span className="text-[11px] text-gray-600 shrink-0">Tocá para ver</span>
+                </div>
               </div>
             )
           })}
+        </div>
+      )}
+
+      {selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={closeModal}
+          />
+          <div className="relative w-full max-w-sm rounded-2xl border border-gray-800 bg-gray-900 p-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="min-w-0">
+                <h2 className="text-lg font-bold text-white truncate">
+                  {selected.platform}
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">Detalle de la cuenta</p>
+              </div>
+              <button
+                onClick={closeModal}
+                aria-label="Cerrar"
+                className="text-gray-500 hover:text-gray-200 text-lg leading-none shrink-0"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Email</p>
+                <p className="text-sm text-gray-100 break-all">{selected.email}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Contraseña</p>
+                <div className="flex items-center justify-between gap-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5">
+                  <p className="text-sm text-white break-all min-w-0">
+                    {revealPwd ? selected.password : '••••••••••'}
+                  </p>
+                  <button
+                    onClick={() => setRevealPwd((r) => !r)}
+                    className="text-xs font-medium text-emerald-400 shrink-0 active:scale-95"
+                    aria-label={revealPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {revealPwd ? 'Ocultar' : 'Ver'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={closeModal}
+              className="w-full mt-5 rounded-xl bg-gray-800 py-2.5 text-sm font-medium text-gray-300 active:scale-[0.99] hover:bg-gray-700"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       )}
     </div>
