@@ -18,10 +18,17 @@ const TableIcon = ({ className }) => (
   </svg>
 )
 
+const KeyIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+  </svg>
+)
+
 const links = [
   { to: '/', label: 'Inicio', icon: HomeIcon },
   { to: '/nuevo', label: 'Nuevo', icon: PlusIcon },
   { to: '/contable', label: 'Contable', icon: TableIcon },
+  { to: '/cuentas', label: 'Cuentas', icon: KeyIcon },
 ]
 
 const desktopNavClass = ({ isActive }) =>
@@ -56,7 +63,7 @@ export default function MobileLayout() {
       </div>
 
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-10">
-        <div className="max-w-md mx-auto grid grid-cols-3 bg-gray-900 border-t border-gray-800">
+        <div className="max-w-md mx-auto grid grid-cols-4 bg-gray-900 border-t border-gray-800">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end={to === '/'} className={mobileNavClass}>
               <Icon className="w-6 h-6 mb-0.5" />

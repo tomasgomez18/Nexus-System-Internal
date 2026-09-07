@@ -33,6 +33,14 @@ export const createMovement = (body) =>
 export const deleteMovement = (id) =>
   request(`/movements/${id}`, { method: 'DELETE' })
 
+export const getAccounts = () => request('/accounts')
+export const createAccount = (body) =>
+  request('/accounts', { method: 'POST', body: JSON.stringify(body) })
+export const updateAccount = (id, body) =>
+  request(`/accounts/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+export const deleteAccount = (id) =>
+  request(`/accounts/${id}`, { method: 'DELETE' })
+
 export const formatMoney = (value) =>
   new Intl.NumberFormat('es-AR', {
     style: 'currency',

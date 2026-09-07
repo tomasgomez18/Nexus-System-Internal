@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import { connectDB } from './src/config/db.js'
 import projectRoutes from './src/routes/project.routes.js'
 import movementRoutes from './src/routes/movement.routes.js'
+import accountRoutes from './src/routes/account.routes.js'
 import { errorHandler } from './src/middlewares/errorHandler.js'
 
 const app = express()
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/projects', projectRoutes)
 app.use('/api/movements', movementRoutes)
+app.use('/api/accounts', accountRoutes)
 
 app.use(errorHandler)
 
